@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SSO Admin Dashboard{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link href="/admin/css/admin.css" rel="stylesheet">
+    
+    {% block styles %}{% endblock %}
+</head>
+<body class="admin-layout">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="fas fa-lock"></i> SSO Admin
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="adminNavbar">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_page == 'dashboard' %}active{% endif %}" href="/admin">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    {% if admin.permissions contains 'users.view' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if current_page == 'users' %}active{% endif %}" 
+                           href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/users">All Users</a></li>
+                            <li><a class="dropdown-item" href="/admin/users/create">Create User</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/users?status=active">Active Users</a></li>
+                            <li><a class="dropdown-item" href="/admin/users?status=inactive">Inactive Users</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    {% if admin.permissions contains 'apikeys.view' %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_page == 'apikeys' %}active{% endif %}" 
+                           href="/admin/api-keys">
+                            <i class="fas fa-key"></i> API Keys
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if admin.permissions contains 'system.logs.view' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if current_page == 'system' %}active{% endif %}" 
+                           href="#" id="systemDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog"></i> System
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/system/logs">Audit Logs</a></li>
+                            <li><a class="dropdown-item" href="/admin/system/metrics">Metrics</a></li>
+                            <li><a class="dropdown-item" href="/admin/system/settings">Settings</a></li>
+                            {% if admin.permissions contains 'system.backup' %}
+                            <li><a class="dropdown-item" href="/admin/system/backup">Backup</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-shield"></i> {{ admin.name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text"><small>Logged in as {{ admin.username }}</small></span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user-cog"></i> Profile</a></li>
+                            <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+        
+        {% if success %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ success }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <span class="text-muted">SSO Admin Dashboard v1.0</span>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="text-muted">Server Time: {{ "now"|date("Y-m-d H:i:s") }}</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="/admin/js/admin.js"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

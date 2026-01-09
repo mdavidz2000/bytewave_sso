@@ -1,0 +1,23 @@
+{
+    "name": "bytewave/sso-auth-server",
+    "description": "SSO Authentication Server with Admin Dashboard",
+    "type": "project",
+    "require": {
+        "slim/slim": "^4.0",
+        "slim/psr7": "^1.5",
+        "slim/twig-view": "^3.3",
+        "firebase/php-jwt": "^6.3",
+        "vlucas/phpdotenv": "^5.4",
+        "php-di/php-di": "^6.4",
+        "respect/validation": "^2.2",
+        "phpmailer/phpmailer": "^6.6",
+        "monolog/monolog": "^2.8",
+        "guzzlehttp/guzzle": "^7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/",
+            "App\\Admin\\": "admin/"
+        }
+    }
+}

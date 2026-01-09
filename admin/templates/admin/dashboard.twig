@@ -1,0 +1,238 @@
+{% extends "admin/layout.twig" %}
+
+{% block title %}Dashboard - SSO Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Stats Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total Users</h6>
+                        <h2 class="mb-0">{{ stats.total_users }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-3x opacity-50"></i>
+                </div>
+                <div class="mt-2">
+                    <small>{{ stats.new_users_month }} new this month</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Active Users</h6>
+                        <h2 class="mb-0">{{ stats.active_users }}</h2>
+                    </div>
+                    <i class="fas fa-user-check fa-3x opacity-50"></i>
+                </div>
+                <div class="mt-2">
+                    <small>Last 30 days</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">API Keys</h6>
+                        <h2 class="mb-0">{{ stats.active_api_keys }}</h2>
+                    </div>
+                    <i class="fas fa-key fa-3x opacity-50"></i>
+                </div>
+                <div class="mt-2">
+                    <small>Active keys</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Logins Today</h6>
+                        <h2 class="mb-0">{{ stats.logins_today }}</h2>
+                    </div>
+                    <i class="fas fa-sign-in-alt fa-3x opacity-50"></i>
+                </div>
+                <div class="mt-2">
+                    <small>{{ stats.failed_logins_today }} failed attempts</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- System Health -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-heartbeat"></i> System Health</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td>Database</td>
+                        <td>
+                            {% if system_health.database == 'healthy' %}
+                                <span class="badge bg-success">Healthy</span>
+                            {% else %}
+                                <span class="badge bg-danger">Unhealthy</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Disk Usage</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar {% if system_health.disk_usage > 90 %}bg-danger{% elseif system_health.disk_usage > 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                     style="width: {{ system_health.disk_usage }}%">
+                                    {{ system_health.disk_usage }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Memory Usage</td>
+                        <td>{{ system_health.memory_usage }} MB</td>
+                    </tr>
+                    <tr>
+                        <td>Uptime</td>
+                        <td>{{ system_health.uptime }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    {% if admin.permissions contains 'users.create' %}
+                    <div class="col-6">
+                        <a href="/admin/users/create" class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus"></i> Create User
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if admin.permissions contains 'apikeys.create' %}
+                    <div class="col-6">
+                        <a href="/admin/api-keys/create" class="btn btn-success w-100">
+                            <i class="fas fa-key"></i> Create API Key
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if admin.permissions contains 'users.export' %}
+                    <div class="col-6">
+                        <a href="/admin/users/export?format=csv" class="btn btn-info w-100">
+                            <i class="fas fa-download"></i> Export Users
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if admin.permissions contains 'system.backup' %}
+                    <div class="col-6">
+                        <a href="/admin/system/backup" class="btn btn-warning w-100">
+                            <i class="fas fa-save"></i> System Backup
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-history"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>Resource</th>
+                                <th>Admin</th>
+                                <th>User</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in recent_activity %}
+                            <tr>
+                                <td>{{ activity.created_at|date("Y-m-d H:i") }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 
+                                        activity.action starts with 'user_create' ? 'success' :
+                                        activity.action starts with 'user_update' ? 'info' :
+                                        activity.action starts with 'user_delete' ? 'danger' :
+                                        activity.action starts with 'login' ? 'warning' :
+                                        'secondary'
+                                    }}">
+                                        {{ activity.action|replace({'_': ' '})|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if activity.resource_type and activity.resource_id %}
+                                        {{ activity.resource_type }} #{{ activity.resource_id }}
+                                    {% else %}
+                                        <em>System</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if activity.admin_username %}
+                                        {{ activity.admin_name }} ({{ activity.admin_username }})
+                                    {% else %}
+                                        <em>System</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if activity.user_email %}
+                                        {{ activity.user_name }} ({{ activity.user_email }})
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ activity.ip_address }}</code></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">No recent activity</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-2">
+                    <a href="/admin/system/logs" class="btn btn-sm btn-outline-primary">
+                        View All Logs <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
