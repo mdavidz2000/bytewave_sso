@@ -1,7 +1,14 @@
 <?php
 
+// Start session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
+
 use Slim\Factory\AppFactory;
 use DI\Container;
 
@@ -18,6 +25,9 @@ AppFactory::setContainer($container);
 // Create app
 $app = AppFactory::create();
 
+// Set base path for proper routing
+$app->setBasePath('');
+
 // Add middleware
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
@@ -30,15 +40,11 @@ $errorMiddleware = $app->addErrorMiddleware(
 );
 
 // Configure dependencies
-//require __DIR__ . '/../config/dependencies.php';
-// FIX: Capture the returned function and execute it
 $dependencies = require __DIR__ . '/../config/dependencies.php';
 $dependencies($container);
 
-// Main SSO routes
+// Load routes
 require __DIR__ . '/../config/routes.php';
-
-// Admin dashboard routes
 require __DIR__ . '/../config/admin-routes.php';
 
 $app->run();

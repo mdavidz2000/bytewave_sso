@@ -7,7 +7,6 @@ use App\Admin\Controllers\SystemController;
 use App\Admin\Controllers\AuthController;
 use App\Admin\Middleware\AdminAuthMiddleware;
 use App\Admin\Middleware\PermissionMiddleware;
-
 use App\Admin\Services\AdminAuthService;
 
 // Admin authentication routes (public)
@@ -34,9 +33,9 @@ $app->group('/admin', function (RouteCollectorProxy $group) {
 });
 
 // Protected admin routes
-$app->group('/admin', function (RouteCollectorProxy $group) {
+$app->group('/admin', function (RouteCollectorProxy $group) use ($container) {
     
-    // Dashboard
+    // Dashboard - this handles /admin and /admin/dashboard
     $group->get('', [DashboardController::class, 'dashboard'])
         ->setName('admin.dashboard');
     
@@ -69,53 +68,46 @@ $app->group('/admin', function (RouteCollectorProxy $group) {
         
         $users->get('/export', [UsersController::class, 'export'])
             ->setName('admin.users.export');
-    });//->add(new PermissionMiddleware('users.view'));
+    });
 
-    // API Keys Management
-    $group->group('/api-keys', function (RouteCollectorProxy $keys) {
-        $keys->get('', [ApiKeysController::class, 'index'])
-            ->setName('admin.apikeys.index');
-        
-        $keys->get('/{id:[0-9]+}/revoke', [ApiKeysController::class, 'revoke'])
-            ->setName('admin.apikeys.revoke');
-        
-        $keys->get('/stats', [ApiKeysController::class, 'stats'])
-            ->setName('admin.apikeys.stats');
-    });//->add(new PermissionMiddleware('apikeys.view'));
+    // API Keys Management (if controller exists)
+    if (class_exists('App\Admin\Controllers\ApiKeysController')) {
+        $group->group('/api-keys', function (RouteCollectorProxy $keys) {
+            $keys->get('', [ApiKeysController::class, 'index'])
+                ->setName('admin.apikeys.index');
+            
+            $keys->get('/{id:[0-9]+}/revoke', [ApiKeysController::class, 'revoke'])
+                ->setName('admin.apikeys.revoke');
+            
+            $keys->get('/stats', [ApiKeysController::class, 'stats'])
+                ->setName('admin.apikeys.stats');
+        });
+    }
 
-    // System Management
-    $group->group('/system', function (RouteCollectorProxy $system) {
-        $system->get('/logs', [SystemController::class, 'logs'])
-            ->setName('admin.system.logs');
-        
-        $system->get('/logs/clear', [SystemController::class, 'clearLogs'])
-            ->setName('admin.system.logs.clear');
-        
-        $system->get('/metrics', [SystemController::class, 'metrics'])
-            ->setName('admin.system.metrics');
-        
-        $system->get('/settings', [SystemController::class, 'settings'])
-            ->setName('admin.system.settings');
-        
-        $system->post('/settings', [SystemController::class, 'updateSettings']);
-        
-        $system->get('/backup', [SystemController::class, 'backup'])
-            ->setName('admin.system.backup');
-        
-        $system->post('/backup/create', [SystemController::class, 'createBackup'])
-            ->setName('admin.system.backup.create');
-    });//->add(new PermissionMiddleware('system.logs.view'));
-
-    // Admin Users Management (for super admins)
-    $group->group('/admins', function (RouteCollectorProxy $admins) {
-        $admins->get('', [\App\Admin\Controllers\AdminUsersController::class, 'index'])
-            ->setName('admin.admins.index');
-        
-        $admins->get('/create', [\App\Admin\Controllers\AdminUsersController::class, 'create'])
-            ->setName('admin.admins.create');
-        
-        $admins->post('/create', [\App\Admin\Controllers\AdminUsersController::class, 'create']);
-    });//->add(new PermissionMiddleware('admin_users.view'));
+    // System Management (if controller exists)
+    if (class_exists('App\Admin\Controllers\SystemController')) {
+        $group->group('/system', function (RouteCollectorProxy $system) {
+            $system->get('/logs', [SystemController::class, 'logs'])
+                ->setName('admin.system.logs');
+            
+            $system->get('/logs/clear', [SystemController::class, 'clearLogs'])
+                ->setName('admin.system.logs.clear');
+            
+            $system->get('/metrics', [SystemController::class, 'metrics'])
+                ->setName('admin.system.metrics');
+            
+            $system->get('/settings', [SystemController::class, 'settings'])
+                ->setName('admin.system.settings');
+            
+            $system->post('/settings', [SystemController::class, 'updateSettings']);
+            
+            $system->get('/backup', [SystemController::class, 'backup'])
+                ->setName('admin.system.backup');
+            
+            $system->post('/backup/create', [SystemController::class, 'createBackup'])
+                ->setName('admin.system.backup.create');
+        });
+    }
 
 })->add(new AdminAuthMiddleware($container->get(AdminAuthService::class)))
   ->add(function ($request, $handler) {

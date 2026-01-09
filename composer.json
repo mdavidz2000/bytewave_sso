@@ -3,6 +3,7 @@
     "description": "SSO Authentication Server with Admin Dashboard",
     "type": "project",
     "require": {
+        "php": "^8.0",
         "slim/slim": "^4.0",
         "slim/psr7": "^1.5",
         "slim/twig-view": "^3.3",
@@ -14,10 +15,17 @@
         "monolog/monolog": "^2.8",
         "guzzlehttp/guzzle": "^7.4"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
     "autoload": {
         "psr-4": {
             "App\\": "src/",
             "App\\Admin\\": "admin/"
         }
+    },
+    "scripts": {
+        "start": "php -S localhost:8079 -t public router.php",
+        "test": "phpunit"
     }
 }
